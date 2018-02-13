@@ -422,6 +422,33 @@ class AssertionBase(object):
         if dates[0] == dates[1]:
             self.fail('{} = {}'.format(date1, date2))
 
+    def model_fields_equal(self, model, data=None, msg=None):
+        """
+        To compare models fields and values in data
+
+        """
+        self.is_not_none(model, msg='model is None')
+        dct_model = model.to_dict()
+
+        keys = data.keys()
+        fields = data.values()
+
+        if keys:
+            dct_model = dict((k, v) for k, v in dct_model.items() if k in keys)
+
+        errors = list()
+
+        for field in set(dct_model.keys() + keys):
+            value1, value2 = dct_model.get(field), data.get(field)
+
+            if value1 != value2:
+                errors.append(
+                    u'filed "{}": {} != {}'.format(field, value1, value2),
+                )
+
+        if errors:
+            raise AssertionError(u', '.join(errors))
+
     def response(self,
                  resp,
                  status,
